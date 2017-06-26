@@ -1,0 +1,10 @@
+Thin	Cell Phone	6000
+Normal	Tablet	1500
+Mini	Tablet	5500
+UltraThin	Cell Phone	6000
+VeryThin	Cell Phone	6000
+Big	Tablet	2500
+Bedable	Cell Phone	3000
+Foldable	Cell Phone	3500
+Pro	Tablet	4500
+Pro2	Tablet	6500
