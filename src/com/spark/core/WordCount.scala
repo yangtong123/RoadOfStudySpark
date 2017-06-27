@@ -22,6 +22,5 @@ object WordCount {
         
         wordSort.collect()
         
-        sc.stop()
     }
 }

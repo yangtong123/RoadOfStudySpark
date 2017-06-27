@@ -11,5 +11,14 @@
     <orderEntry type="library" name="spark_2.0.2" level="application" />
     <orderEntry type="library" name="kafka_2.11_0.10.1.0" level="application" />
     <orderEntry type="library" name="hive_1.1.1" level="application" />
+    <orderEntry type="module-library">
+      <library>
+        <CLASSES>
+          <root url="jar://$USER_HOME$/DevelopResource/jblas/jblas-1.2.4.jar!/" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES />
+      </library>
+    </orderEntry>
   </component>
 </module>
