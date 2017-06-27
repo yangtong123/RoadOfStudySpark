@@ -1,6 +1,13 @@
 # Spark Core学习笔记
 
-[TOC]
+<p>
+<a href="#一各个算子学习笔记">一、各个算子的学习笔记</a></br>
+    <a href="#map-mapPartitions-mapPartitionWithIndex">map mapPartitions mapPartitionWithIndex</a></br>
+    <a href=""></a></br>
+    <a href=""></a></br>
+
+
+</p>
 
 ## 一、各个算子的学习笔记
 
@@ -56,7 +63,7 @@ reduceByKey和groupByKey异同之处</br>
 >> * 第一个参数是，每个key的初始值
 >> * 第二个是个函数，Seq Function，如何进行shuffle map-side的本地聚合
 >> * 第三个是个函数，Combiner Function，如何进行shuffle reduce-side的全局聚合
-[AggregateByKey事例代码](./AggregateByKey)
+[AggregateByKey示例代码](./AggregateByKey)
 
 
 ### distinct
