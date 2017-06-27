@@ -1,13 +1,25 @@
 # Spark Core学习笔记
 
-<p>
-<a href="#一各个算子的学习笔记">一、各个算子的学习笔记</a></br>
-    <a href="#map-mapPartitions-mapPartitionWithIndex">map mapPartitions mapPartitionWithIndex</a></br>
-    <a href="#sample和takeSample">sample和takeSample</a></br>
-    <a href="#union">union</a></br>
-
-
-</p>
+# 目录
+* [一、各个算子的学习笔记](#一各个算子的学习笔记)
+    * [map mapPartitions mapPartitionWithIndex](#map-mappartitions-mappartitionwithindex)
+    * [sample和takeSample](#sample和takesample)
+    * [union](#union)
+    * [groupByKey](#groupbykey)
+    * [reduceByKey](#reducebykey)
+    * [aggregateByKey](#aggregatebykey)
+    * [distinct](#distinct)
+    * [cogroup](#cogroup)
+    * [intersection](#intersection)
+    * [join](#join)
+    * [sortByKey](#sortbykey)
+    * [cartesian](#cartesian)
+    * [coalesce和repartition](#coalesce和repartition)
+    
+    
+    
+    
+    
 
 ## 一、各个算子的学习笔记
 
