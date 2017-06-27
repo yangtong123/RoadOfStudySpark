@@ -1,10 +1,10 @@
 # Spark Core学习笔记
 
 <p>
-<a href="#一各个算子学习笔记">一、各个算子的学习笔记</a></br>
+<a href="#一各个算子的学习笔记">一、各个算子的学习笔记</a></br>
     <a href="#map-mapPartitions-mapPartitionWithIndex">map mapPartitions mapPartitionWithIndex</a></br>
-    <a href=""></a></br>
-    <a href=""></a></br>
+    <a href="#sample和takeSample">sample和takeSample</a></br>
+    <a href="#union">union</a></br>
 
 
 </p>
