@@ -23,10 +23,34 @@ groupByKey等shuffle算子，都会创建一些隐式RDD，主要是作为这个
 
 ### 1.5 reduceByKey
 reduceByKey和groupByKey异同之处</br>
-> 1.不同之处：reduceByKey,多了一个RDD，MapPartitionRDD，存在于stage0的，主要是代表了进行本地数据规约之后的rdd，
+> 1. 不同之处：reduceByKey,多了一个RDD，MapPartitionRDD，存在于stage0的，主要是代表了进行本地数据规约之后的rdd，
 所以，网络传输的数据量以及磁盘I/O等都会减少，性能更高。</br>
-> 2.相同之处: 后面进行shuffle read和聚合的过程基本喝groupByKey类似。都是shuffleRDD，去做shuffle read。然后聚合，
+> 2. 相同之处: 后面进行shuffle read和聚合的过程基本喝groupByKey类似。都是shuffleRDD，去做shuffle read。然后聚合，
 聚合后的数据就是最终的RDD。</br>
 <div align=center>
-    <img src="./pic/reduceByKey.png" width="600", height="350"/>
+    <img src="./pic/reduceByKey.png" width="70%", height="50%"/>
 </div>
+
+### 1.6 distinct
+distinct的原理：</br>
+> 1. 首先map操作给自己每个值都打上一个v2，变成一个tuple</br>
+> 2. 然后调用reduceByKey(仅仅返回一个value) </br>
+> 3. 将去重后的数据，从tuple还原为单值</br>
+<div align=center>
+    <img src="./pic/distinct.png" width="70%", height="50%"/>
+</div>
+
+### 1.7 cogroup
+把多个RDD中的数据根据key聚合起来
+<div align=center>
+    <img src="./pic/cogroup.png" width="70%", height="50%"/>
+</div>
+
+### 1.8 intersection
+intersection的原理：
+> 1. 首先map操作变成一个tuple
+> 2. 然后cogroup聚合两个RDD的key
+> 3. filter, 过滤掉两个集合中任意一个集合为空的key
+> 4. map，还原出单key
+
+
