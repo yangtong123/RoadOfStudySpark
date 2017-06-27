@@ -15,4 +15,4 @@ union操作就是把两个RDD聚合成一个RDD，其中是原封不动的把各
 
 ### 1.4 groupByKey
 groupByKey等shuffle算子，都会创建一些隐式RDD，主要是作为这个操作的一些中间数据的表达，以及作为stage划分的边界
-![groupByKey](./pic/groupByKey.png)
+<img src="./pic/groupByKey.png" width="300" height="200" align=center/>
