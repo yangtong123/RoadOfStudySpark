@@ -134,6 +134,7 @@ repartition操作是coalesce函数第二个参数为true的实现
 var data = sc.textFile("...") // 假设分区数为2
 var rdd1 = data.coalesce(1)   // 分区数小于原分区数目，可以正常进行
 var rdd2 = data.coalesce(4)   // 如果分区数目大于原来分区数，必须指定shuffle为true，否则分区数不变
+// 也就是说coalesce只能用来减少分区
 ```
 repartition原理如下：</br>
 > 1. map, 附加了前缀，根据要重分区成几个分区，计算出前缀
