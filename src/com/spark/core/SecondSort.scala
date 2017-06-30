@@ -8,7 +8,7 @@ import org.apache.spark.{SparkConf, SparkContext}
 object SecondSort {
     def main(args: Array[String]): Unit = {
         val conf = new SparkConf()
-                .setAppName("top3")
+                .setAppName("SecondSort")
                 .setMaster("local[2]")
         val sc = new SparkContext(conf)
     
@@ -22,7 +22,7 @@ object SecondSort {
         
         val sortedLines = sortedPairs.map(sortedPair => sortedPair._2)
     
-        sortedPairs.foreach(println)
+        sortedLines.foreach(println)
     }
 }
 

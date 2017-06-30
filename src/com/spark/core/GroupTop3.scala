@@ -9,7 +9,7 @@ import org.apache.spark.{SparkConf, SparkContext}
 object GroupTop3 {
     def main(args: Array[String]): Unit = {
         val conf = new SparkConf()
-                .setAppName("top3")
+                .setAppName("GroupTop3")
                 .setMaster("local[2]")
         val sc = new SparkContext(conf)
         
@@ -20,7 +20,7 @@ object GroupTop3 {
         
         val groupedPair: RDD[(String, Iterable[Int])] = pairs.groupByKey()
         
-        val groupSorted = groupedPair.map{pair => {
+        val groupSorted: RDD[(String, List[Int])] = groupedPair.map{ pair => {
             val top3 = Array[Int](-1, -1, -1);
             
             val group = pair._1

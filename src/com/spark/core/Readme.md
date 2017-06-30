@@ -117,7 +117,7 @@ sortByKey的原理：
 > 1. shuffleRDD, 做shuffle read, 将相同的key拉到一个partition中来
 > 2. mapPartition, 对每个partition内的key进行全局的排序
 <div align=center>
-    <img src="./pic/sortBykey.png" width="70%", height="50%"/>
+    <img src="./pic/sortByKey.png" width="70%", height="50%"/>
 </div>
 
 ### cartesian
@@ -143,3 +143,42 @@ repartition原理如下：</br>
     <img src="./pic/repartition.png" width="70%", height="50%"/>
 </div>
 
+### 二次排序
+spark的二次排序的意思就是在第一个值相等的情况下，根据第二个值进行排序</br>
+一般是要继承Ordered(和java的comparator很像)，如下：</br>
+``` scala
+class SecondSortKey(val first: Int, val second : Int) extends Ordered[SecondSortKey] with Serializable {
+    override def compare(that: SecondSortKey): Int = {
+        if (this.first - that.first != 0) {
+            this.first - that.first
+        } else {
+            this.second - that.second
+        }
+    }
+}
+```
+详情参见[SecondSort.scala](./SecondSort.scala)
+
+### 分组取topN
+分组取topN，就是在每个分组中取最高N个数，详见[GroupTop3](./GroupTop3.scala)
+
+## 二、spark核心原理
+
+### sparkContext原理分析
+
+### sparkContext源码分析
+
+### spark消息通信
+
+### spark作业执行原理及源码分析
+
+### spark调度算法及源码分析
+
+
+## 三、spark存储原理
+
+### 存储分析
+
+### shuffle分析
+
+### 共享变量
