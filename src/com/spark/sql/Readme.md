@@ -14,12 +14,12 @@ Row就是一个untyped类型的对象，因为Row是类似于数据库中的一�
 * 静态类型以及运行时的类型安全性</br>
 > SQL语言具有最不严格的限制，而Dataset具有最严格的限制。SQL语言在只有在运行时才能发现一些错误，比如类型错误，但是由于Dataframe/Dataset目前都是要求类型指定的（静态类型），因此在编译时就可以发现类型错误，并提供运行时的类型安全。比如说，如果我们调用了一个不属于Dataframe的API，编译时就会报错。但是如果你使用了一个不存在的列，那么也只能到运行时才能发现了。而最严格的就是Dataset了，因为Dataset是完全基于typed API来设计的，类型都是严格而且强类型的，因此如果你使用了错误的类型，或者对不存在的列进行了操作，都能在编译时就发现。</br>
 
-<div align=center>
+
 |   |  SQL  |  DataFrame  |  DataSet  |
 |:--:|:----:|:-----------:|:---------:|
 |Syntax Error  | Runtime | Compile Time | Compile Time |
 |Analysis Error| Runtime | Runtime      | Compile Time |
-</div>
+
 
 * 将半结构化的数据转换为typed自定义类型</br>
 
@@ -90,11 +90,12 @@ select where groupBy agg col join </br>
     * collect_list collect_set
     
 * 其它函数[OtherFunction](./OtherFunction.scala)  
-日期函数：current_date、current_timestamp  
-数学函数：round  
-随机函数：rand  
-字符串函数：concat、concat_ws  
-自定义udf和udaf函数,参见[sparkSQL udf和udaf](###sparksqludf和udaf)  
+   * 日期函数：current_date、current_timestamp  
+   * 数学函数：round  
+   * 随机函数：rand  
+   * 字符串函数：concat、concat_ws  
+   * 自定义udf和udaf函数,参见[sparkSQL udf和udaf](###sparksqludf和udaf)</br>
+   
 其它函数可以参考：[spark文档](http://spark.apache.org/docs/latest/api/scala/index.html#org.apache.spark.sql.functions$)
 
 
