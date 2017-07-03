@@ -284,5 +284,5 @@ beeline> !connect jdbc:hive2://localhost:10001/default?hive.server2.transport.mo
 示例代码：[ThriftJDBCServerTest](./ThriftJDBCServerTest.scala)
 
 ## 一个实战的案例
-就在本文件夹下有个[news](./news)文件夹, [OfflineDataGenerator](./OfflineDataGenerator.scala)是模拟数据的，[NewsOfflineStatSpark](./NewsOfflineStatSpark.scala)是主要业务实现
+就在本文件夹下有个[news](./news)文件夹, [OfflineDataGenerator](./news/OfflineDataGenerator.scala)是模拟数据的，[NewsOfflineStatSpark](./news/NewsOfflineStatSpark.scala)是主要业务实现
 
