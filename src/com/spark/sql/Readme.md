@@ -2,6 +2,19 @@
 
 # 目录
 
+* [sparkSQL基础操作](#sparksql基础操作)
+    * [RDD, DataFrame, DataSet, SparkSession](#rdd-dataframe-dataset-sparksession)
+        * [DataSet API有哪些优点](#dataset-api有哪些优点)
+        * [DataSet操作](#dataset操作)
+    * [RDD转为DataFrame](#rdd转为dataframe)
+    * [sparkSQL udf和udaf](#sparksql-udf和udaf)
+* [sparkSQL各种数据源](#sparksql各种数据源)
+    * [文件](#文件)
+    * [Hive](#hive)
+    * [JDBC](#jdbc)
+* [Thrift JDBC ODBC Server](#thrift-jdbc-odbc-server)
+
+
 ## sparkSQL基础操作
 
 ### RDD, DataFrame, DataSet, SparkSession
@@ -23,7 +36,7 @@ Row就是一个untyped类型的对象，因为Row是类似于数据库中的一�
 
 2. 将半结构化的数据转换为typed自定义类型</br>
 
-> 举例来说，如果我们现在有一份包含了学校中所有学生的信息，是以JSON字符串格式定义的，比如：{“name”: “leo”, “age”, 19, “classNo”: 1}。我们可以自己定义一个类型，比如case class Student(name: String, age: Integer, classNo: Integer)。接着我们就可以加载指定的json文件，并将其转换为typed类型的Dataset[Student]，比如val ds = spark.read.json("students.json").as[Student]。
+> 举例来说，如果我们现在有一份包含了学校中所有学生的信息，是以JSON字符串格式定义的，比如`{“name”: “leo”, “age”, 19, “classNo”: 1}`。我们可以自己定义一个类型，比如`case class Student(name: String, age: Integer, classNo: Integer)`。接着我们就可以加载指定的json文件，并将其转换为typed类型的`Dataset[Student]`，比如`val ds = spark.read.json("students.json").as[Student]`。
 
 在这里，Spark会执行三个操作：
 1. Spark首先会读取json文件，并且自动推断其schema，然后根据schema创建一个DataFrame。
@@ -96,7 +109,7 @@ select where groupBy agg col join </br>
    * 字符串函数：concat、concat_ws
    * 聚合函数: countDistinct [DailyUV](./DailyUV.scala) 
    * 开窗函数：row_number [RowNumberWindowFunction](./RowNumberWindowFunction.scala)
-   * 自定义udf和udaf函数,参见[sparkSQL udf和udaf](###sparksqludf和udaf)</br>
+   * 自定义udf和udaf函数,参见[sparkSQL udf和udaf](###sparksql-udf和udaf)</br>
    
 其它函数可以参考：[spark文档](http://spark.apache.org/docs/latest/api/scala/index.html#org.apache.spark.sql.functions$)
 
@@ -129,7 +142,7 @@ UDAF可以针对多行输入，进行聚合计算，返回一个输出，功能�
 
 ### 文件
 
-1. JSON
+**1. JSON**
 
 Spark SQL可以自动推断JSON文件的元数据，并且加载其数据，创建一个DataFrame。可以使用SQLContext.read.json()方法，针对一个元素类型为String的RDD，或者是一个JSON文件。
 
@@ -137,7 +150,7 @@ Spark SQL可以自动推断JSON文件的元数据，并且加载其数据，创�
 
 [JSONDataSource](./JSONDataSource.scala)
 
-2. Parquet  
+**2. Parquet**  
 
 Parquet是面向分析型业务的列式存储格式，  
 列式存储和行式存储相比有哪些优势呢？
@@ -180,8 +193,7 @@ tableName
 
 实现代码如下：
 ``` scala
-val usersDF = sqlContext.read().parquet(
-				"hdfs://spark1:9000/spark-study/users/gender=male/country=US/users.parquet")
+val usersDF = sqlContext.read().parquet("hdfs://spark1:9000/spark-study/users/gender=male/country=US/users.parquet")
 usersDF.printSchema()
 usersDF.show()
 ```
@@ -205,7 +217,7 @@ Spark SQL支持对Hive中存储的数据进行读写。可以执行Hive的大部
 Spark SQL支持使用JDBC从关系型数据库（比如MySQL）中读取数据。读取的数据，依然由DataFrame表示，可以很方便地使用Spark Core提供的各种算子进行处理。
 [JDBCDataSource](./JDBCDataSource.scala)
 
-## ThriftJDBC ODBCServer
+## Thrift JDBC ODBC Server
 Spark SQL的Thrift JDBC/ODBC server是基于Hive 0.13的HiveServer2实现的。这个服务启动之后，最主要的功能就是可以让我们通过
 Java JDBC来以编程的方式调用Spark SQL。此外，在启动该服务之后，可以通过Spark或Hive 0.13自带的beeline工具来进行测试。
 
