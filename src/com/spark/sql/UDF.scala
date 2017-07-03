@@ -9,7 +9,7 @@ import org.apache.spark.sql.{Row, SparkSession}
 object UDF {
     def main(args: Array[String]): Unit = {
         val sparkSession = SparkSession.builder()
-                .appName("HiveDataSource")
+                .appName("UDF")
                 .master("local[2]")
                 .getOrCreate()
         

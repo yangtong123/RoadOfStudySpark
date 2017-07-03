@@ -40,7 +40,7 @@ object JDBCDataSource {
                 )
                 
     
-        val studentRowsRDD= studentsRDD.map(tuple => Row(tuple._1, tuple._2._1, tuple._2._2))
+        val studentRowsRDD = studentsRDD.map(tuple => Row(tuple._1, tuple._2._1, tuple._2._2))
         
         val structType = StructType(Array(
             StructField("name", StringType, true),
