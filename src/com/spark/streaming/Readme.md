@@ -28,7 +28,7 @@
         * [不支持的操作](#524-不支持的操作)
     * [starting streaming query](#53-starting-streaming-query)
     * [managing streaming query](#54-managing-streaming-query)
-    * [checkpoint](#55-checkpoint-1)
+    * [checkpoint](#55-checkpoint)
     * [源码及架构分析](#56-源码及架构分析)
     
     
@@ -318,7 +318,7 @@ writeStream
     .option("path", "path/to/destination/dir")
     .start()
 ```
-* foreach sink - 对输出的结果执行任意的计算, 详见[foreach sink详解](####534-foreach-sink详解)
+* foreach sink - 对输出的结果执行任意的计算, 详见[foreach sink详解](#534-foreach-sink详解)
 ``` scala
 writeStream
     .foreach(...)
