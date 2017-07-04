@@ -2,7 +2,7 @@
 
 # 目录
 
-* [Spark Streaming 基本工作原理](#spark-streaming-基本工作原理)
+* [Spark Streaming 基本工作原理](#一spark-streaming-基本工作原理)
     * [DStream](#dstream)
     * [Kafka的Receiver和Direct方式](#kafka的receiver和direct方式)
         * [基于Receiver的方式](#基于receiver的方式)
@@ -28,13 +28,13 @@
     
         
 
-## Spark Streaming 基本工作原理
+## 一、Spark Streaming 基本工作原理
 Spark Streaming内部的基本工作原理如下：接收实时输入数据流，然后将数据拆分成多个batch，比如每收集1秒的数据封装为一个batch，然后将每个batch交给Spark的计算引擎进行处理，最后会生产出一个结果数据流，其中的数据，也是由一个一个的batch所组成的。
 <div align=center>
     <img src="./pic/spark_streaming_data_flow.png" width="70%" height="50%" />
 </div></br>
 
-### DStream
+### 1.1 DStream
 Spark Streaming提供了一种高级的抽象，叫做DStream，英文全称为Discretized Stream，中文翻译为“离散流”，它代表了一个持续不断的数据流。DStream可以通过输入数据源来创建，比如Kafka、Flume和Kinesis；也可以通过对其他DStream应用高阶函数来创建，比如map、reduce、join、window。  
 
 DStream的内部，其实一系列持续不断产生的RDD。RDD是Spark Core的核心抽象，即，不可变的，分布式的数据集。DStream中的每个RDD都包含了一个时间段内的数据。  
@@ -52,9 +52,9 @@ Spark Streaming的具体工作原理如下：
     <img src="./pic/Spark Streaming基本工作原理.png" />
 </div></br>
 
-### Kafka的Receiver和Direct方式
+### 1.2 Kafka的Receiver和Direct方式
 
-#### 基于Receiver的方式
+#### 1.2.1 基于Receiver的方式
 这种方式使用Receiver来获取数据。Receiver是使用Kafka的高层次Consumer API来实现的。receiver从Kafka中获取的数据都是存储在Spark Executor的内存中的，然后Spark Streaming启动的job会去处理那些数据。  
 
 然而，在默认的配置下，这种方式可能会因为底层的失败而丢失数据。如果要启用高可靠机制，让数据零丢失，就必须启用Spark Streaming的预写日志机制（Write Ahead Log，WAL）。该机制会同步地将接收到的Kafka数据写入分布式文件系统（比如HDFS）上的预写日志中。所以，即使底层节点出现了失败，也可以使用预写日志中的数据进行恢复。  
@@ -66,7 +66,7 @@ Spark Streaming的具体工作原理如下：
 
 代码：[KafkaReceiverWordCount](./KafkaReceiverWordCount.scala)
 
-#### 基于Direct方式
+#### 1.2.2 基于Direct方式
 这种新的不基于Receiver的直接方式，是在Spark 1.3中引入的，从而能够确保更加健壮的机制。替代掉使用Receiver来接收数据后，这种方式会周期性地查询Kafka，来获得每个topic+partition的最新的offset，从而定义每个batch的offset的范围。当处理数据的job启动时，就会使用Kafka的简单consumer api来获取Kafka指定offset范围的数据。  
 
 优点：
@@ -82,10 +82,10 @@ Spark Streaming的具体工作原理如下：
 
 代码：[KafkaDirectWordCount](./KafkaDirectWordCount.scala)
 
-### transformation
+### 1.3 transformation
 对于基础的操作就不一一列出来来，参考[官网文档](http://spark.apache.org/docs/latest/streaming-programming-guide.html#transformations-on-dstreams)
 
-#### updateStateByKey
+#### 1.3.1 updateStateByKey
 updateStateByKey操作，可以让我们为每个key维护一份state，并持续不断的更新该state。
 1. 首先，要定义一个state，可以是任意的数据类型；
 2. 其次，要定义state更新函数——指定一个函数如何使用之前的state和新值来更新state。
@@ -98,17 +98,17 @@ updateStateByKey操作，可以让我们为每个key维护一份state，并持�
 
 代码：[UpdateStateByKey](./UpdateStateByKey.scala)
 
-#### transform
+#### 1.3.2 transform
 transform操作，应用在DStream上时，可以用于执行任意的RDD到RDD的转换操作。它可以用于实现，DStream API中所没有提供的操作。比如说，DStream API中，并没有提供将一个DStream中的每个batch，与一个特定的RDD进行join的操作。但是我们自己就可以使用transform操作来实现该功能。  
 DStream.join()，只能join其他DStream。在DStream每个batch的RDD计算出来之后，会去跟其他DStream的RDD进行join。  
 
 代码：[TransformBlacklist](./TransformBlacklist.scala)
 
-#### window
-一些基础知识参看[官方文档](http://spark.apache.org/docs/latest/streaming-programming-guide.html#window-operations)
+#### 1.3.3 window
+一些基础知识参看[官方文档](http://spark.apache.org/docs/latest/streaming-programming-guide.html#window-operations)  
 代码：[WindowHotWord](./WindowHotWord.scala)
 
-### output和foreachRDD
+### 1.4 output和foreachRDD
 DStream中的所有计算，都是由output操作触发的，比如print()。  
 
 此外，即使你使用了foreachRDD output操作，也必须在里面对RDD执行action操作，才能触发对每一个batch的计算逻辑。否则，光有foreachRDD output操作，在里面没有对RDD执行action操作，也不会触发任何逻辑。
@@ -125,12 +125,12 @@ dstream.foreachRDD { rdd =>
 ```
 代码：[PersistWordCount](./PersistWordCount.scala)
 
-### 与Spark SQL结合
+### 1.5 与Spark SQL结合
 Spark Streaming最强大的地方在于，可以与Spark Core、Spark SQL整合使用，之前已经通过transform、foreachRDD等算子看到，如何将DStream中的RDD使用Spark Core执行批处理操作。现在就来看看，如何将DStream中的RDD与Spark SQL结合起来使用。  
 代码：[Top3HotProduct](./Top3HotProduct.scala)
 
 
-## 缓存与持久化
+## 二、缓存与持久化
 与RDD类似，Spark Streaming也可以让开发人员手动控制，将数据流中的数据持久化到内存中。对DStream调用persist()方法，就可以让Spark Streaming自动将该数据流中的所有产生的RDD，都持久化到内存中。如果要对一个DStream多次执行操作，那么，对DStream持久化是非常有用的。因为多次操作，可以共享使用内存中的一份缓存数据。
 
 对于基于窗口的操作，比如reduceByWindow、reduceByKeyAndWindow，以及基于状态的操作，比如updateStateByKey，默认就隐式开启了持久化机制。即Spark Streaming默认就会将上述操作产生的Dstream中的数据，缓存到内存中，不需要开发人员手动调用persist()方法。
@@ -139,7 +139,7 @@ Spark Streaming最强大的地方在于，可以与Spark Core、Spark SQL整合�
 
 与RDD不同的是，默认的持久化级别，统一都是要序列化的。
 
-## Checkpoint
+## 三、Checkpoint
 每一个Spark Streaming应用，正常来说，都是要7 * 24小时运转的，这就是实时计算程序的特点。因为要持续不断的对数据进行计算。因此，对实时计算应用的要求，应该是必须要能够对与应用程序逻辑无关的失败，进行容错。  
 
 如果要实现这个目标，Spark Streaming程序就必须将足够的信息checkpoint到容错的存储系统上，从而让它能够从失败中进行恢复。有两种数据需要被进行checkpoint：  
@@ -151,12 +151,12 @@ Spark Streaming最强大的地方在于，可以与Spark Core、Spark SQL整合�
 
 元数据checkpoint主要是为了从driver失败中进行恢复；而RDD checkpoint主要是为了，使用到有状态的transformation操作时，能够在其生产出的数据丢失时，进行快速的失败恢复。
 
-### 何时开启Checkpoint机制
+### 3.1 何时开启Checkpoint机制
 * 使用了有状态的transformation操作——比如updateStateByKey，或者reduceByKeyAndWindow操作，被使用了，那么checkpoint目录要求是必须提供的，也就是必须开启checkpoint机制，从而进行周期性的RDD checkpoint。
 
 * 要保证可以从Driver失败中进行恢复——元数据checkpoint需要启用，来进行这种情况的恢复。
 
-### 如何配置Checkpoint
+### 3.2 如何配置Checkpoint
 * 对于有状态的transformation操作，启用checkpoint机制，定期将其生产的RDD数据checkpoint，是比较简单的。
 
 可以通过配置一个容错的、可靠的文件系统（比如HDFS）的目录，来启用checkpoint机制，checkpoint数据就会写入该目录。使用StreamingContext的checkpoint()方法即可。然后，你就可以放心使用有状态的transformation操作了。
@@ -173,10 +173,10 @@ Spark Streaming最强大的地方在于，可以与Spark Core、Spark SQL整合�
    对于那些要求checkpoint的有状态的transformation操作，默认的checkpoint间隔通常是batch间隔的数倍，至少是10秒。使用DStream的checkpoint()方法，可以设置这个DStream的checkpoint的间隔时长。通常来说，将checkpoint间隔设置为窗口操作的滑动间隔的5~10倍，是个不错的选择。  
    
 
-## 源码分析
+## 四、源码分析
 未完待续
 
-## Structured Streaming
+## 五、Structured Streaming
 大多数的流式计算引擎（比如storm、spark streaming等）都仅仅关注流数据的计算方面：比如使用一个map函数对一个流中每条数据都进行转换，或者是用reduce函数对一批数据进行聚合。但是，实际上在大部分的流式计算应用中，远远不只是需要一个流式计算引擎那么简单。相反的，流式计算仅仅在流式应用中占据一个部分而已。因此现在出现了一个新的名词，叫做持续计算/应用，continuous application。  
 
 Spark 2.0中，引入的structured streaming，就是为了实现上述所说的continuous application，也就是持续计算的。首先，structured streaming是一种比spark更高阶的api，主要是基于spark的批处理中的高阶api，比如dataset/dataframe。此外，structured streaming也提供很多其他流式计算应用所无法提供的功能：
@@ -187,7 +187,7 @@ Spark 2.0中，引入的structured streaming，就是为了实现上述所说的
 ```
 
 
-### 编程模型
+### 5.1 编程模型
 structured streaming的核心理念，就是将数据流抽象成一张表，而源源不断过来的数据是持续地添加到这个表中的。这就产生了一种全新的流式计算模型，与离线计算模型是很类似的。你可以使用与在一个静态表中执行离线查询相同的方式来编写流式查询。spark会采用一种增量执行的方式来对表中源源不断的数据进行查询。我们可以将输入数据流想象成是一张input table。数据流中每条新到达的数据，都可以想象成是一条添加到表中的新数据。  
 <div align=center>
     <img src="./pic/structured_streaming编程模型.png" width="70%" height="50%" />
@@ -199,17 +199,17 @@ structured streaming的核心理念，就是将数据流抽象成一张表，而
 * append mode，只有最近一次trigger之后，新增加到result table中的数据，会被写入外部存储。只有当我们确定，result table中已有的数据是肯定不会被改变时，才应该使用append mode。
 * update mode，只有最近一次trigger之后，result table中被更新的数据，包括增加的和修改的，会被写入外部存储中。这种mode和complete mode不同，没有改变的数据是不会写入外部存储的。
 
-#### event-time和late-data process
+#### 5.1.1 event-time和late-data process
 
-##### event-time
+##### 5.1.1.1 event-time
 event-time指的是嵌入在数据自身内部的一个时间。在很多流式计算应用中，我们可能都需要根据event-time来进行处理。例如，可能我们需要获取某个设备每分钟产生的事件的数量，那么我们就需要使用事件产生时的时间，而不是spark接受到这条数据的时间。设备产生的每个事件都是input table中的一行数据，而event-time就是这行数据的一个字段。这就可以支持我们进行基于时间窗口的聚合操作（例如每分钟的事件数量），只要针对input table中的event-time字段进行分组和聚合即可。每个时间窗口就是一个分组，而每一行都可以落入不同行的分组内。因此，类似这样的基于时间窗口的分组聚合操作，既可以被定义在一份静态数据上，也可以被定义在一个实时数据流上。
 
-##### late-data
+##### 5.1.1.2 late-data
 late-data就是延迟到达的数据。spark会负责更新result table，因此它有决定的控制权来针对延迟到达的数据进行聚合结果的重新计算。虽然目前在spark 2.0中还没有实现这个feature，但是未来会基于event-time watermark（水印）来实现这个late-data processing的feature。
 
-### 流式DataSet和DataFrame
+### 5.2 流式DataSet和DataFrame
 
-#### 创建流式DataSet和DataFrame
+#### 5.2.1 创建流式DataSet和DataFrame
 流式DataFrame可以通过DataStreamReader接口来创建，DataStreamReader对象是通过SparkSession的readStream()方法返回的。与创建静态DataFrame的read()方法类似，我们可以指定数据源的一些配置信息，比如data format、schema、option等。spark 2.0中初步提供了一些内置的source支持。  
 * file source：以数据流的方式读取一个目录中的文件。支持text、csv、json、parquet等文件类型。文件必须是被移动到目录中的，比如用mv命令。
 * socket source：从socket连接中读取文本内容。driver是负责监听请求的server socket。socket source只能被用来进行测试。
@@ -217,9 +217,9 @@ late-data就是延迟到达的数据。spark会负责更新result table，因此
 
 还是来一个WordCount的例子:joy:：[StructuredNetworkWordCount](./structured/StructuredNetworkWordCount.scala)
 
-#### 对流式DataSet和DataFrame进行操作
+#### 5.2.2 对流式DataSet和DataFrame进行操作
 
-##### 基础操作
+##### 5.2.2.1 基础操作
 我们可以对流式DataSet/DataFrame执行所有类型的操作，包括untyped操作，SQL类操作，typed操作。
 ``` scala
 case class DeviceData(device: String, deviceType: String, signal: Double, time: DateTime)
@@ -238,7 +238,7 @@ df.groupBy("deviceType").count()                          // using untyped API
 import org.apache.spark.sql.expressions.scalalang.typed
 ds.groupByKey(_.deviceType).agg(typed.avg(_.signal))    // using typed API
 ```
-##### 基于event-time滑动窗口操作
+##### 5.2.2.2 基于event-time滑动窗口操作
 ``` scala
 import spark.implicits._
 
@@ -261,7 +261,7 @@ val windowedCounts = words.groupBy(
     <img src="./pic/late_data.png" width="70%" height="50%" />
 </div></br>
 
-#### join操作
+#### 5.2.3 join操作
 structured streaming，支持将一个流式DataSet与一个静态DataSet进行join。
 ``` scala
 val staticDf = spark.read. ...
@@ -271,7 +271,7 @@ streamingDf.join(staticDf, "type")          // inner equi-join with a static DF
 streamingDf.join(staticDf, "type", "right_join")  // right outer join with a static DF
 ```
 
-#### 不支持的操作
+#### 5.2.4 不支持的操作
 * streaming DataFrame的chain aggregation
 * limit and take
 * distinct
@@ -285,9 +285,9 @@ streamingDf.join(staticDf, "type", "right_join")  // right outer join with a sta
 * foreach() -> df.writeStream.foreach()
 * show() -> console output sink
 
-### starting streaming query
+### 5.3 starting streaming query
 
-#### output操作
+#### 5.3.1 output操作
 定义好了各种计算操作之后，就需要启动这个应用。此时就需要使用DataStreamWriter，通过spark.writeStream()方法返回。此时需要指定以下一些信息：
 * output sink的一些细节：数据格式、位置等。
 * output mode：以哪种方式将result table的数据写入sink。
@@ -295,7 +295,7 @@ streamingDf.join(staticDf, "type", "right_join")  // right outer join with a sta
 * trigger interval：如果不指定，那么默认就会尽可能快速地处理数据，只要之前的数据处理完，就会立即处理下一条数据。如果上一个数据还没处理完，而这一个trigger也错过了，那么会一起放入下一个trigger再处理。
 * checkpoint地址：对于某些sink，可以做到一次且仅一次的语义，此时需要指定一个目录，进而可以将一些元信息写入其中。一般会是类似hdfs上的容错目录。
 
-#### output mode
+#### 5.3.2 output mode
 * append mode（默认）：仅适用于不包含聚合操作的查询。
 * complete mode：仅适用于包含聚合操作的查询。
 * update mode: 只有result table中的行自上一次操作以来有更新的话才写到output sink。
@@ -304,7 +304,7 @@ streamingDf.join(staticDf, "type", "right_join")  // right outer join with a sta
 </div></br>
 
 
-#### output sink
+#### 5.3.4 output sink
 * file sink - 输出存储在一个目录中
 ``` scala
 writeStream
@@ -335,7 +335,7 @@ writeStream
     <img src="./pic/output_sink.png" width="70%" height="50%" />
 </div></br>
 
-#### foreach sink详解
+#### 5.3.5 foreach sink详解
 使用foreach sink时，我们需要自定义ForeachWriter，并且自定义处理每条数据的业务逻辑。每次trigger发生后，根据output mode需要写入sink的数据，就会传递给ForeachWriter来进行处理。使用如下方式来定义ForeachWriter：
 ``` scala
 datasetOfString.writeStream.foreach(new ForeachWriter[String] {
@@ -362,7 +362,7 @@ datasetOfString.writeStream.foreach(new ForeachWriter[String] {
 * close方法中，需要处理一些异常，以及一些资源的释放。
 
 
-### managing streaming query
+### 5.4 managing streaming query
 StreamingQuery对象在一个query开始的执行时候被创建出来，它可以用来监控和管理一个query
 ``` scala
 val query = df.writeStream.format("console").start()   // get the query object
@@ -396,7 +396,7 @@ spark.streams.get(id)   // get a query object by its unique id
 spark.streams.awaitAnyTermination()   // block until any one of them terminates
 ```
 
-### checkpoint
+### 5.5 checkpoint
 如果实时计算作业遇到了某个错误挂掉了，那么我们可以配置容错机制让它自动重启，同时继续之前的进度运行下去。这是通过checkpoint和wal机制完成的。可以给query配置一个checkpoint location，接着query会将所有的元信息（比如每个trigger消费的offset范围、至今为止的聚合结果数据），写入checkpoint目录。  
 ``` scala
 aggDF
@@ -407,5 +407,5 @@ aggDF
    .start()
 ```
 
-### 源码及架构分析
+### 5.6 源码及架构分析
 [Structured Streaming源码解析系列](https://github.com/lw-lin/CoolplaySpark/tree/master/Structured%20Streaming%20%E6%BA%90%E7%A0%81%E8%A7%A3%E6%9E%90%E7%B3%BB%E5%88%97)
