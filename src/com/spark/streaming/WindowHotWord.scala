@@ -4,6 +4,7 @@ import org.apache.spark.{SparkConf, SparkContext}
 import org.apache.spark.streaming.{Durations, Seconds, StreamingContext}
 
 /**
+  * 热点搜索词滑动统计，每隔10秒，统计最近60秒钟的搜索词的搜索频次
   * Created by yangtong on 17/6/19.
   */
 object WindowHotWord {

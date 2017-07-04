@@ -6,6 +6,8 @@ import org.apache.spark.{SparkConf, SparkContext}
 import org.apache.spark.streaming.{Seconds, StreamingContext}
 
 /**
+  * 改写UpdateStateByKeyWordCount，将每次统计出来的全局的单词计数，写入一份
+  *
   * Created by yangtong on 17/6/19.
   */
 object PersistWordCount {
