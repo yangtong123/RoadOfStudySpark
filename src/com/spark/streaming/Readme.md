@@ -2,6 +2,32 @@
 
 # 目录
 
+* [Spark Streaming 基本工作原理](#spark-streaming-基本工作原理)
+    * [DStream](#dstream)
+    * [Kafka的Receiver和Direct方式](#kafka的receiver和direct方式)
+        * [基于Receiver的方式](#基于receiver的方式)
+        * [基于Direct方式](#基于direct方式)
+    * [transformation](#transformation)
+        * [updateStateByKey](#updatestatebykey)
+        * [transform](#transform)
+        * [window](#window)
+    * [output和foreachRDD](#output和foreachrdd)
+    * [与Spark SQL结合](#与spark-sql结合)
+* [缓存与持久化](#缓存与持久化)
+* [Checkpoint](#checkpoint)
+    * [何时开启Checkpoint机制](#何时开启checkpoint机制)
+    * [如何配置Checkpoint](#如何配置checkpoint)
+* [源码分析](#源码分析)
+* [Structured Streaming](#structured-streaming)
+    * [编程模型](#编程模型)
+    * [流式DataSet和DataFrame](#流式dataset和dataframe)
+    * [starting streaming query](#starting-streaming-query)
+    * [managing streaming query](#managing-streaming-query)
+    * [checkpoint](#checkpoint-1)
+    
+    
+        
+
 ## Spark Streaming 基本工作原理
 Spark Streaming内部的基本工作原理如下：接收实时输入数据流，然后将数据拆分成多个batch，比如每收集1秒的数据封装为一个batch，然后将每个batch交给Spark的计算引擎进行处理，最后会生产出一个结果数据流，其中的数据，也是由一个一个的batch所组成的。
 <div align=center>
@@ -23,7 +49,7 @@ DStream的内部，其实一系列持续不断产生的RDD。RDD是Spark Core的
 
 Spark Streaming的具体工作原理如下：
 <div align=center>
-    <img src="./pic/Spark Streaming基本工作原理.png" width="70%" height="50%" />
+    <img src="./pic/Spark Streaming基本工作原理.png" />
 </div></br>
 
 ### Kafka的Receiver和Direct方式
@@ -32,23 +58,25 @@ Spark Streaming的具体工作原理如下：
 这种方式使用Receiver来获取数据。Receiver是使用Kafka的高层次Consumer API来实现的。receiver从Kafka中获取的数据都是存储在Spark Executor的内存中的，然后Spark Streaming启动的job会去处理那些数据。  
 
 然而，在默认的配置下，这种方式可能会因为底层的失败而丢失数据。如果要启用高可靠机制，让数据零丢失，就必须启用Spark Streaming的预写日志机制（Write Ahead Log，WAL）。该机制会同步地将接收到的Kafka数据写入分布式文件系统（比如HDFS）上的预写日志中。所以，即使底层节点出现了失败，也可以使用预写日志中的数据进行恢复。  
-代码：[KafkaReceiverWordCount](./KafkaReceiverWordCount.scala)
+
 > 需要注意的点：  
     1、Kafka中的topic的partition，与Spark中的RDD的partition是没有关系的。所以，在KafkaUtils.createStream()中，提高partition的数量，只会增加一个Receiver中，读取partition的线程的数量。不会增加Spark处理数据的并行度。  
     2、可以创建多个Kafka输入DStream，使用不同的consumer group和topic，来通过多个receiver并行接收数据。  
     3、如果基于容错的文件系统，比如HDFS，启用了预写日志机制，接收到的数据都会被复制一份到预写日志中。因此，在KafkaUtils.createStream()中，设置的持久化级别是StorageLevel.MEMORY_AND_DISK_SER。
 
+代码：[KafkaReceiverWordCount](./KafkaReceiverWordCount.scala)
+
 #### 基于Direct方式
 这种新的不基于Receiver的直接方式，是在Spark 1.3中引入的，从而能够确保更加健壮的机制。替代掉使用Receiver来接收数据后，这种方式会周期性地查询Kafka，来获得每个topic+partition的最新的offset，从而定义每个batch的offset的范围。当处理数据的job启动时，就会使用Kafka的简单consumer api来获取Kafka指定offset范围的数据。  
 
 优点：
-1. 简化并行读取：  
+* 简化并行读取：  
 如果要读取多个partition，不需要创建多个输入DStream然后对它们进行union操作。Spark会创建跟Kafka partition一样多的RDD partition，并且会并行从Kafka中读取数据。所以在Kafka partition和RDD partition之间，有一个一对一的映射关系。
 
-2. 高性能：  
+* 高性能：  
 如果要保证零数据丢失，在基于receiver的方式中，需要开启WAL机制。这种方式其实效率低下，因为数据实际上被复制了两份，Kafka自己本身就有高可靠的机制，会对数据复制一份，而这里又会复制一份到WAL中。而基于direct的方式，不依赖Receiver，不需要开启WAL机制，只要Kafka中作了数据的复制，那么就可以通过Kafka的副本进行恢复。
 
-3. 一次且仅一次的事务机制：  
+* 一次且仅一次的事务机制：  
 基于receiver的方式，是使用Kafka的高阶API来在ZooKeeper中保存消费过的offset的。这是消费Kafka数据的传统方式。这种方式配合着WAL机制可以保证数据零丢失的高可靠性，但是却无法保证数据被处理一次且仅一次，可能会处理两次。因为Spark和ZooKeeper之间可能是不同步的。  
 基于direct的方式，使用Kafka的简单api，Spark Streaming自己就负责追踪消费的offset，并保存在checkpoint中。Spark自己一定是同步的，因此可以保证数据是消费一次且仅消费一次。
 
@@ -211,7 +239,7 @@ import org.apache.spark.sql.expressions.scalalang.typed
 ds.groupByKey(_.deviceType).agg(typed.avg(_.signal))    // using typed API
 ```
 ##### 基于event-time滑动窗口操作
-```
+``` scala
 import spark.implicits._
 
 val words = ... // streaming DataFrame of schema { timestamp: Timestamp, word: String }
@@ -235,7 +263,7 @@ val windowedCounts = words.groupBy(
 
 #### join操作
 structured streaming，支持将一个流式DataSet与一个静态DataSet进行join。
-```
+``` scala
 val staticDf = spark.read. ...
 val streamingDf = spark.readStream. ... 
 
@@ -278,26 +306,26 @@ streamingDf.join(staticDf, "type", "right_join")  // right outer join with a sta
 
 #### output sink
 * file sink - 输出存储在一个目录中
-```
+``` scala
 writeStream
     .format("parquet")        // can be "orc", "json", "csv", etc.
     .option("path", "path/to/destination/dir")
     .start()
 ```
 * foreach sink - 对输出的结果执行任意的计算, 详见[foreach sink详解](####foreac_sink详解)
-```
+``` scala
 writeStream
     .foreach(...)
     .start()
 ```
 * console sink - 打印结果在控制台（仅仅用于调试）
-```
+``` scala
 writeStream
     .format("console")
     .start()
 ```
 * memory sink - 将结果存储在内存表中（仅仅用于调试）
-```
+``` scala
 writeStream
     .format("memory")
     .queryName("tableName")
@@ -309,7 +337,7 @@ writeStream
 
 #### foreach sink详解
 使用foreach sink时，我们需要自定义ForeachWriter，并且自定义处理每条数据的业务逻辑。每次trigger发生后，根据output mode需要写入sink的数据，就会传递给ForeachWriter来进行处理。使用如下方式来定义ForeachWriter：
-```
+``` scala
 datasetOfString.writeStream.foreach(new ForeachWriter[String] {
 
   def open(partitionId: Long, version: Long): Boolean = {
@@ -379,5 +407,5 @@ aggDF
    .start()
 ```
 
-## 源码及架构分析
+### 源码及架构分析
 [Structured Streaming源码解析系列](https://github.com/lw-lin/CoolplaySpark/tree/master/Structured%20Streaming%20%E6%BA%90%E7%A0%81%E8%A7%A3%E6%9E%90%E7%B3%BB%E5%88%97)
