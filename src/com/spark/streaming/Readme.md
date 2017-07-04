@@ -3,27 +3,33 @@
 # 目录
 
 * [Spark Streaming 基本工作原理](#一spark-streaming-基本工作原理)
-    * [DStream](#dstream)
-    * [Kafka的Receiver和Direct方式](#kafka的receiver和direct方式)
-        * [基于Receiver的方式](#基于receiver的方式)
-        * [基于Direct方式](#基于direct方式)
-    * [transformation](#transformation)
-        * [updateStateByKey](#updatestatebykey)
-        * [transform](#transform)
-        * [window](#window)
-    * [output和foreachRDD](#output和foreachrdd)
-    * [与Spark SQL结合](#与spark-sql结合)
-* [缓存与持久化](#缓存与持久化)
-* [Checkpoint](#checkpoint)
-    * [何时开启Checkpoint机制](#何时开启checkpoint机制)
-    * [如何配置Checkpoint](#如何配置checkpoint)
-* [源码分析](#源码分析)
-* [Structured Streaming](#structured-streaming)
-    * [编程模型](#编程模型)
-    * [流式DataSet和DataFrame](#流式dataset和dataframe)
-    * [starting streaming query](#starting-streaming-query)
-    * [managing streaming query](#managing-streaming-query)
-    * [checkpoint](#checkpoint-1)
+    * [DStream](#11-dstream)
+    * [Kafka的Receiver和Direct方式](#12-kafka的receiver和direct方式)
+        * [基于Receiver的方式](#121-基于receiver的方式)
+        * [基于Direct方式](#122-基于direct方式)
+    * [transformation](#13-transformation)
+        * [updateStateByKey](#131-updatestatebykey)
+        * [transform](#132-transform)
+        * [window](#133-window)
+    * [output和foreachRDD](#14-output和foreachrdd)
+    * [与Spark SQL结合](#15-与spark-sql结合)
+* [缓存与持久化](#二缓存与持久化)
+* [Checkpoint](#三checkpoint)
+    * [何时开启Checkpoint机制](#31-何时开启checkpoint机制)
+    * [如何配置Checkpoint](#32-如何配置checkpoint)
+* [源码分析](#四源码分析)
+* [Structured Streaming](#五structured-streaming)
+    * [编程模型](#51-编程模型)
+        * [event-time和late-data process](#511-event-time和late-data-process)
+    * [流式DataSet和DataFrame](#52-流式dataset和dataframe)
+        * [创建流式DataSet和DataFrame](#521-创建流式dataset和dataframe)
+        * [对流式DataSet和DataFrame进行操作](#522-对流式dataset和dataframe进行操作)
+        * [join操作](#523-join操作)
+        * [不支持的操作](#524-不支持的操作)
+    * [starting streaming query](#53-starting-streaming-query)
+    * [managing streaming query](#54-managing-streaming-query)
+    * [checkpoint](#55-checkpoint-1)
+    * [源码及架构分析](#56-源码及架构分析)
     
     
         
@@ -304,7 +310,7 @@ streamingDf.join(staticDf, "type", "right_join")  // right outer join with a sta
 </div></br>
 
 
-#### 5.3.4 output sink
+#### 5.3.3 output sink
 * file sink - 输出存储在一个目录中
 ``` scala
 writeStream
@@ -312,7 +318,7 @@ writeStream
     .option("path", "path/to/destination/dir")
     .start()
 ```
-* foreach sink - 对输出的结果执行任意的计算, 详见[foreach sink详解](####foreac_sink详解)
+* foreach sink - 对输出的结果执行任意的计算, 详见[foreach sink详解](####534-foreach-sink详解)
 ``` scala
 writeStream
     .foreach(...)
@@ -335,7 +341,7 @@ writeStream
     <img src="./pic/output_sink.png" width="70%" height="50%" />
 </div></br>
 
-#### 5.3.5 foreach sink详解
+#### 5.3.4 foreach sink详解
 使用foreach sink时，我们需要自定义ForeachWriter，并且自定义处理每条数据的业务逻辑。每次trigger发生后，根据output mode需要写入sink的数据，就会传递给ForeachWriter来进行处理。使用如下方式来定义ForeachWriter：
 ``` scala
 datasetOfString.writeStream.foreach(new ForeachWriter[String] {
