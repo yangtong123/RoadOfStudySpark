@@ -191,7 +191,7 @@ private def getAncestorShuffleDependencies(rdd: RDD[_]): Stack[ShuffleDependency
 ```
 只看代码还是会头大，我们结合一个图来讲解上面的代码：如下图，有7个RDD，分别是rddA~rddG，它们之间有5个操作，其划分调度阶段如下：  
 <div align=center>
-    <img src=".／pic/Spark调度阶段划分.png">
+    <img src="./pic/Spark调度阶段划分.png">
 </div>
 
 1. 在SparkContext中提交运行时，会调用DAGScheduler的handleJobSubmitted进行处理，在该方法中会先找到最后一个RDD(即rddG)，并调用getParentStages方法
@@ -463,7 +463,7 @@ private def launchTasks(tasks: Seq[Seq[TaskDescription]]) {
 ```
 我们继续通过图解来解释以上代码的调用过程，如下图所示：
 <div align=center>
-    <img src="./pic/提交调度阶段任务运行顺序.png">
+    <img src="./pic/提交调度阶段运行顺序.png">
 </div>
 
 1. 在提交stage中，第一次调用的是ShuffleMapStage0和ShuffleMapStage1，假设都只有两个partition，ShuffleMapStage0是TaskSet0，
