@@ -5,8 +5,9 @@
 ### Spark启动消息通信
 Spark启动过程中主要是进行Master和Worker之间的通信，其消息发送关系如下，首先由worker节点向Master发送注册消息，然后Master处理完毕后，返回注册成功消息或失败消息。
 <div align=center>
-    <img src="./pic/Spark启动时消息通信.png" />
+    <img src="./pic/Spark启动时消息通信.png" width=70% height=50% />
 </div>
+</br>
 其详细过程如下：
 
 1. 当Master启动后，随之启动各Worker，Worker启动时会创建通信环境RpcEnv和终端点EndPoint，并向Master发送注册Worker的消息RegisterWorker.Worker.tryRegisterAllMasters方法如下：
@@ -404,4 +405,5 @@ private def createTaskScheduler(
 <div align=center>
     <img src="./pic/SparkContext原理剖析.png" />
 </div>
+
 
