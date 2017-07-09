@@ -128,7 +128,7 @@ assignedCores
    否则还是分配1个。
    
 
-[返回目录](./Readme.md)
+[返回开始](./Readme.md) 就是Spark Core的Readme.md
 
 # 参考资料
 [图解Spark: 核心技术与案例实战](http://www.cnblogs.com/shishanyuan/)
