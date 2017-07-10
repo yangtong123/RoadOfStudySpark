@@ -1,10 +1,17 @@
 # Spark Shuffle分析
 
+# 目录
+
+* [Shuffle简介](#shuffle简介)
+* [Shuffle写操作](#shuffle写操作)
+* [Shuffle读操作](#shuffle读操作)
+
+
+
 ## Shuffle简介
 在Hadoop中的MapReduce框架中，Shuffle是连接Map和Reduce的桥梁,Map的输出到Reduce中必须经过Shuffle这个环节。由于Shuffle阶段涉及磁盘的读写和网络传输，
 因此Shuffle的性能高低影响整个程序的性能和吞吐量。  
 Shuffle的中文意思是"洗牌，混洗"的意思，把分布在不同节点的数据按照一定的规则聚集到一起的过程称为Shuffle。
-
 
 
 ## Shuffle写操作
@@ -104,7 +111,7 @@ def insertAll(records: Iterator[Product2[K, V]]): Unit = {
 
 ## Shuffle读操作
 <div align=center>
-    <img src="Shuffle读流程图">
+    <img src="Shuffle读流程.png">
 </div>
 
 1. 在SparkEnv启动时，会对ShuffleManage、BlockManager和MapOutputTracker等实例化。ShuffleManager配置项有SortShuffleManager和自定义的ShuffleManager两种，
@@ -322,3 +329,9 @@ override def read(): Iterator[Product2[K, C]] = {
     }
   }
 ```
+
+[返回目录](#目录) 就是本页面的目录 </br> 
+[返回开始](./Readme.md) 就是Spark Core的Readme.md
+
+# 参考资料
+[图解Spark: 核心技术与案例实战](http://www.cnblogs.com/shishanyuan/)
