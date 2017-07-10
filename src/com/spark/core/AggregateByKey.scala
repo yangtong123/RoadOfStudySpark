@@ -10,7 +10,7 @@ import org.apache.spark.{SparkConf, SparkContext}
 object AggregateByKey {
     def main(args: Array[String]): Unit = {
         val conf = new SparkConf()
-                .setAppName("wordcount")
+                .setAppName("AggregateByKey")
                 .setMaster("local[2]")
         val sc = new SparkContext(conf)
     
