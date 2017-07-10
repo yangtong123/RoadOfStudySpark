@@ -111,7 +111,7 @@ def insertAll(records: Iterator[Product2[K, V]]): Unit = {
 
 ## Shuffle读操作
 <div align=center>
-    <img src="Shuffle读流程.png">
+    <img src="Shuffle读流程图.png">
 </div>
 
 1. 在SparkEnv启动时，会对ShuffleManage、BlockManager和MapOutputTracker等实例化。ShuffleManager配置项有SortShuffleManager和自定义的ShuffleManager两种，
