@@ -5,6 +5,7 @@ import org.apache.spark.mllib.regression.{LabeledPoint, LinearRegressionModel, L
 import org.apache.spark.sql.SparkSession
 
 /**
+  * 线性回归
   * Created by yangtong on 17/6/5.
   */
 object LinearRegression {
