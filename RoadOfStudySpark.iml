@@ -8,7 +8,6 @@
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="library" name="scala-sdk-2.11.8" level="application" />
-    <orderEntry type="library" name="spark_2.0.2" level="application" />
     <orderEntry type="library" name="kafka_2.11_0.10.1.0" level="application" />
     <orderEntry type="library" name="hive_1.1.1" level="application" />
     <orderEntry type="module-library">
@@ -20,5 +19,6 @@
         <SOURCES />
       </library>
     </orderEntry>
+    <orderEntry type="library" name="spark_2.2.0" level="application" />
   </component>
 </module>

@@ -14,13 +14,17 @@ object WordCount {
         
         val lines = sc.textFile("./data/core/score.txt")
         
-        val pairs = lines.flatMap(_.split(" ")).map(x => (x, 1))
+        
+        val pairs = lines.flatMap(_.split(" ")).map((_, 1))
+        
         
         val wordCount = pairs.reduceByKey(_+_)
         
         val wordSort = wordCount.map(x=>(x._2, x._1)).sortByKey(false).map(x=>(x._2, x._1))
         
         wordSort.collect()
+        
+        
         
     }
 }
