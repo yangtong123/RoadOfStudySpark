@@ -15,13 +15,13 @@ object GroupTop3 {
         
         val lines = sc.textFile("./data/core/score.txt")
         val pairs = lines.map{line => {
-            val lineSplited = line.split(" ");
+            val lineSplited = line.split(" ")
             (lineSplited(0), lineSplited(1).toInt)}}
         
         val groupedPair: RDD[(String, Iterable[Int])] = pairs.groupByKey()
         
         val groupSorted: RDD[(String, List[Int])] = groupedPair.map{ pair => {
-            val top3 = Array[Int](-1, -1, -1);
+            val top3 = Array[Int](-1, -1, -1)
             
             val group = pair._1
             val iterator = pair._2.iterator
