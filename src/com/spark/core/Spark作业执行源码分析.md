@@ -644,7 +644,7 @@ override def runTask(context: TaskContext): U = {
 ```
 
 [返回目录](#目录) 就是本页面的目录 </br> 
-[返回开始](./Readme.md) 就是Spark Core的Readme.md
+[返回开始](./Readme.md) 就是 Spark Core 的 Readme.md
 
 # 参考资料
 [图解Spark: 核心技术与案例实战](http://www.cnblogs.com/shishanyuan/)
