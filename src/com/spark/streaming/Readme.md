@@ -1,30 +1,37 @@
+<script src="https://cdn.bootcss.com/pangu/3.3.0/pangu.min.js">
+</script>
+
+<script>
+  pangu.spacingPage();
+</script>
+
 # Spark Streaming学习笔记
 
 # 目录
 
 * [Spark Streaming 基本工作原理](#一spark-streaming-基本工作原理)
     * [DStream](#11-dstream)
-    * [Kafka的Receiver和Direct方式](#12-kafka的receiver和direct方式)
-        * [基于Receiver的方式](#121-基于receiver的方式)
-        * [基于Direct方式](#122-基于direct方式)
+    * [Kafka 的 Receiver 和 Direct 方式](#12-kafka-的-receiver-和-direct-方式)
+        * [基于 Receiver 的方式](#121-基于-receiver-的方式)
+        * [基于 Direct 方式](#122-基于-direct-方式)
     * [transformation](#13-transformation)
         * [updateStateByKey](#131-updatestatebykey)
         * [transform](#132-transform)
         * [window](#133-window)
-    * [output和foreachRDD](#14-output和foreachrdd)
-    * [与Spark SQL结合](#15-与spark-sql结合)
+    * [output 和 foreachRDD](#14-output和foreachrdd)
+    * [与 Spark SQL 结合](#15-与-spark-sql-结合)
 * [缓存与持久化](#二缓存与持久化)
 * [Checkpoint](#三checkpoint)
-    * [何时开启Checkpoint机制](#31-何时开启checkpoint机制)
-    * [如何配置Checkpoint](#32-如何配置checkpoint)
+    * [何时开启 Checkpoint 机制](#31-何时开启-checkpoint-机制)
+    * [如何配置 Checkpoint](#32-如何配置-checkpoint)
 * [源码分析](#四源码分析)
 * [Structured Streaming](#五structured-streaming)
     * [编程模型](#51-编程模型)
-        * [event-time和late-data process](#511-event-time和late-data-process)
-    * [流式DataSet和DataFrame](#52-流式dataset和dataframe)
-        * [创建流式DataSet和DataFrame](#521-创建流式dataset和dataframe)
-        * [对流式DataSet和DataFrame进行操作](#522-对流式dataset和dataframe进行操作)
-        * [join操作](#523-join操作)
+        * [event-time 和 late-data process](#511-event-time-和-late-data-process)
+    * [流式 DataSet 和 DataFrame](#52-流式-dataset-和-dataframe)
+        * [创建流式 DataSet 和 DataFrame](#521-创建流式-dataset-和-dataframe)
+        * [对流式 DataSet 和 DataFrame 进行操作](#522-对流式-dataset-和-dataframe-进行操作)
+        * [join 操作](#523-join-操作)
         * [不支持的操作](#524-不支持的操作)
     * [starting streaming query](#53-starting-streaming-query)
     * [managing streaming query](#54-managing-streaming-query)
@@ -35,13 +42,13 @@
         
 
 ## 一、Spark Streaming 基本工作原理
-Spark Streaming内部的基本工作原理如下：接收实时输入数据流，然后将数据拆分成多个batch，比如每收集1秒的数据封装为一个batch，然后将每个batch交给Spark的计算引擎进行处理，最后会生产出一个结果数据流，其中的数据，也是由一个一个的batch所组成的。
+Spark Streaming 内部的基本工作原理如下：接收实时输入数据流，然后将数据拆分成多个 batch，比如每收集1秒的数据封装为一个batch，然后将每个batch交给Spark的计算引擎进行处理，最后会生产出一个结果数据流，其中的数据，也是由一个一个的batch所组成的。
 <div align=center>
     <img src="./pic/spark_streaming_data_flow.png" width="70%" height="50%" />
 </div></br>
 
 ### 1.1 DStream
-Spark Streaming提供了一种高级的抽象，叫做DStream，英文全称为Discretized Stream，中文翻译为“离散流”，它代表了一个持续不断的数据流。DStream可以通过输入数据源来创建，比如Kafka、Flume和Kinesis；也可以通过对其他DStream应用高阶函数来创建，比如map、reduce、join、window。  
+Spark Streaming 提供了一种高级的抽象，叫做 DStream，英文全称为 Discretized Stream，中文翻译为“离散流”，它代表了一个持续不断的数据流。DStream可以通过输入数据源来创建，比如Kafka、Flume和Kinesis；也可以通过对其他DStream应用高阶函数来创建，比如map、reduce、join、window。  
 
 DStream的内部，其实一系列持续不断产生的RDD。RDD是Spark Core的核心抽象，即，不可变的，分布式的数据集。DStream中的每个RDD都包含了一个时间段内的数据。  
 <div align=center>
